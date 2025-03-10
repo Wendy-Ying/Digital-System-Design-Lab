@@ -28,3 +28,11 @@
 # Temporary and output files
 *.bak
 *.backup.*
+
+# Latex
+*.aux
+*.log
+*.out
+*.toc
+*.gz
+*.tex
