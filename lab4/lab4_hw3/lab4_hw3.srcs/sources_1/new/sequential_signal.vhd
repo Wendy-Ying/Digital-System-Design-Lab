@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date: 2025/03/17 16:52:23
+-- Create Date: 2025/03/24 17:53:20
 -- Design Name: 
--- Module Name: sequential_signal - concurrent_arcg
+-- Module Name: sequential_signal - Behavioral
 -- Project Name: 
 -- Target Devices: 
 -- Tool Versions: 
@@ -81,3 +81,4 @@ begin
         end case;
     end process;
 end Behavioral;
+

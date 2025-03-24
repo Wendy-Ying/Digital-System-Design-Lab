@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date: 2025/03/17 16:52:23
+-- Create Date: 2025/03/24 17:12:18
 -- Design Name: 
--- Module Name: sequential_signal - concurrent_arcg
+-- Module Name: sequnetial_signal - Behavioral
 -- Project Name: 
 -- Target Devices: 
 -- Tool Versions: 
@@ -31,50 +31,47 @@ entity sequence_generator is
 end sequence_generator;
 
 architecture Behavioral of sequence_generator is
-    signal current_state : integer range 0 to 7 := 0;
-    signal next_state : integer range 0 to 7;
+    signal current_state : std_logic_vector  (2 downto 0) := (others => '0');
+    signal next_state :  std_logic_vector  (2 downto 0) := (others => '0');
 begin
     -- accident
-    process(clk, reset)
-    begin
-        if reset = '1' then
-            current_state <= 0;
-        elsif CLK'event and CLK = '1' then
-            current_state <= next_state;
-        end if;
-    end process;
+process (clk, reset) is
+begin
+    if reset = '1' then
+        current_state <= "000";
+    elsif clk'event and clk = '1' then
+        current_state <= next_state;
+    end if;
+end process;
 
-    -- state transfer
-    process(current_state)
-    begin
-        case current_state is
-            when 0 =>
-                dataout <= '1';
-                next_state <= 1;
-            when 1 =>
-                dataout <= '1';
-                next_state <= 2;
-            when 2 =>
-                dataout <= '0';
-                next_state <= 3;
-            when 3 =>
-                dataout <= '1';
-                next_state <= 4;
-            when 4 =>
-                dataout <= '1';
-                next_state <= 5;
-            when 5 =>
-                dataout <= '1';
-                next_state <= 6;
-            when 6 =>
-                dataout <= '0';
-                next_state <= 7;
-            when 7 =>
-                dataout <= '0';
-                next_state <= 0;
-            when others =>
-                dataout <= '0';
-                next_state <= 0;
-        end case;
-    end process;
+-- state transfer
+process (current_state) is
+begin
+    case current_state is
+        when "000" =>
+            dataout <= '1';
+            next_state <= "001";
+        when "001" =>
+            dataout <= '1';
+            next_state <= "010";
+        when "010" =>
+            dataout <= '0';
+            next_state <= "011";
+        when "011" =>
+            dataout <= '1';
+            next_state <= "100";
+        when "100" =>
+            dataout <= '1';
+            next_state <= "101";
+        when "101" =>
+            dataout <= '1';
+            next_state <= "110";
+        when "110" =>
+            dataout <= '0';
+            next_state <= "000";
+        when others =>
+            dataout <= '0';
+            next_state <= "000";
+    end case;
+end process;
 end Behavioral;

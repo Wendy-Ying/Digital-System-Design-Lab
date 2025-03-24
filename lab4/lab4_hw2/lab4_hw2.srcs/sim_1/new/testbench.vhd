@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date: 2025/03/03 17:43:25
+-- Create Date: 2025/03/24 17:11:38
 -- Design Name: 
--- Module Name: testbench - tb
+-- Module Name: testbench - Behavioral
 -- Project Name: 
 -- Target Devices: 
 -- Tool Versions: 
@@ -60,9 +60,9 @@ begin
     tb: process is
     begin
         reset <= '1';
-        wait for 200 ns;
+        wait for period;
         reset <= '0';
-        wait for 200 ns;
+        wait for period;
         wait;
     end process;
 
