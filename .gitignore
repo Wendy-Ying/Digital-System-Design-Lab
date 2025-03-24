@@ -3,3 +3,4 @@
 !.gitignore
 !*.vhd
 !*.pdf
+!Nexys-4-DDR-Master.xdc
