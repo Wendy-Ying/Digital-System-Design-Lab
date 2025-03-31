@@ -32,53 +32,36 @@ entity sequence_generator is
 end sequence_generator;
 
 architecture Behavioral of sequence_generator is
-    signal current_state : integer range 0 to 3 := 0;
-    signal next_state : integer range 0 to 3;
+    signal current_state : std_logic_vector(1 downto 0) := "00";
+    signal next_state : std_logic_vector(1 downto 0);
 begin
     process(clk, reset)
     begin
         if reset = '1' then
-            current_state <= 0;
+            current_state <= "00";
         elsif CLK'event and CLK = '1' then
             current_state <= next_state;
         end if;
     end process;
+    
+    -- next state logic
+    with current_state & input select
+        next_state <= 
+            "00" when "000",
+            "01" when "001",
+            "10" when "010",
+            "01" when "011",
+            "00" when "100",
+            "11" when "101",
+            "11" when "110",
+            "11" when "111",
+            "00" when others;
 
-    -- state transfer
-    process(current_state, input)
-    begin
-        case current_state is
-            when 0 =>
-                if input = '0' then
-                    dataout <= '0';
-                    next_state <= 0;
-                else
-                    dataout <= '0';
-                    next_state <= 1;
-                end if;
-            when 1 =>
-                if input = '0' then
-                    dataout <= '0';
-                    next_state <= 2;
-                else
-                    dataout <= '0';
-                    next_state <= 1;
-                end if;
-            when 2 =>
-                if input = '0' then
-                    dataout <= '0';
-                    next_state <= 0;
-                else
-                    dataout <= '1';
-                    next_state <= 3;
-                end if;
-            when 3 =>
-                dataout <= '1';
-                next_state <= 3;
-            when others =>
-                dataout <= '0';
-                next_state <= 0;
-        end case;
-    end process;
+    with current_state & input select
+        dataout <= 
+            '0' when "000" | "001" | "010" | "011" | "100",
+            '1' when "101" | "110" | "111",
+            '0' when others;
+
 end Behavioral;
 

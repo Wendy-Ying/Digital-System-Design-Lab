@@ -62,26 +62,29 @@ begin
     
     tb: process is
     begin
-        reset <= '1';
-        wait for 200 ns;
-        reset <= '0';
-        wait for 200 ns;
-
-        input <= '0';
-        wait for 200 ns;
-        input <= '1';
-        wait for 200 ns;
-        input <= '1';
-        wait for 200 ns;
-        input <= '1';
-        wait for 200 ns;
-        input <= '0';
-        wait for 200 ns;
-        input <= '1';
-        wait for 200 ns;
-        input <= '1';
-        wait for 200 ns;
-        
+        for i in 1 to 10 loop
+            reset <= '1';
+            wait for period;
+            reset <= '0';
+            wait for period;
+            
+            for j in 1 to 2 loop
+                input <= '0';
+                wait for period;
+                input <= '1';
+                wait for period;
+                input <= '1';
+                wait for period;
+                input <= '1';
+                wait for period;
+                input <= '0';
+                wait for period;
+                input <= '1';
+                wait for period;
+                input <= '1';
+                wait for period;
+            end loop;
+        end loop;
         wait;
     end process;
 
