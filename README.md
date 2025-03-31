@@ -13,7 +13,7 @@ We use VHDL to program FPGA. Here is the homework of this course.
 - variable and signal
 - 3-8 decoder
 
-## lab4 register and FSM
+### lab4 register and FSM
 - decimal counter
 - sequence signal generator
 - sequence signal detector
