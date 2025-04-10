@@ -25,9 +25,13 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity topmodule is
-    Port ( CLK : in std_logic;
-           AN : out std_logic_vector (7 downto 0);
-           SEG : out std_logic_vector (7 downto 0));
+    Port ( 
+        CLK : in std_logic;
+        BTNC : in std_logic;
+        BTNU : in std_logic;
+        AN : out std_logic_vector (7 downto 0);
+        SEG : out std_logic_vector (7 downto 0)
+    );
 end topmodule;
 
 architecture Behavioral of topmodule is
@@ -44,15 +48,29 @@ architecture Behavioral of topmodule is
     component timer is
         Port ( 
             clk : in std_logic;
-            number : out std_logic_vector (31 downto 0)
+            btnc : in std_logic;
+            btnu : in std_logic;
+            number : out std_logic_vector (31 downto 0);
         );
     end component timer;
 
+    component ButtonDebounce is
+        Port (
+            clk : in std_logic;
+            btn_in : in std_logic;
+            btn_out : out std_logic
+        );
+    end component ButtonDebounce;
+
     signal number : std_logic_vector (31 downto 0);
+    signal btnc : std_logic;
+    signal btnu : std_logic;
 
 begin
 
-    timer_instance : timer port map ( clk => CLK, number => number );
+    btnc_instance : ButtonDebounce port map ( clk => CLK, btn_in => BTNC, btn_out => btnc );
+    btnu_instance : ButtonDebounce port map ( clk => CLK, btn_in => BTNU, btn_out => btnu );
+    timer_instance : timer port map ( clk => CLK, btnc => btnc, btnu => btnu, number => number );
     segment_display_instance : segment_display port map ( clk => CLK, number => number, SEG => SEG, AN => AN );
 
 end Behavioral;
