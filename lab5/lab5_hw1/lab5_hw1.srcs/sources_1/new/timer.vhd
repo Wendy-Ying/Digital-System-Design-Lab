@@ -29,7 +29,7 @@ entity timer is
         clk : in std_logic;
         btnc : in std_logic;
         btnu : in std_logic;
-        number : out std_logic_vector (31 downto 0);
+        number : out std_logic_vector (31 downto 0)
     );
 end timer;
 
@@ -54,6 +54,7 @@ architecture Behavioral of timer is
     signal min_units : std_logic_vector(3 downto 0);  -- m (0-9)
     signal hour_tens : std_logic_vector(3 downto 0);  -- h (0-1)
     signal hour_units : std_logic_vector(3 downto 0);  -- h (0-9)
+    signal noon_tens : std_logic_vector(3 downto 0);  -- A/P
 
     signal temp_s : integer range 0 to 59;
     signal tens_value_s : integer range 0 to 5;
@@ -89,45 +90,28 @@ begin
     end process;
 
     -- time register
-    process (count)
+    process (count, btnu, btnc)
     begin
-        if state = 0 then
-            if count = '1' then
-                seconds_reg <= seconds_next;
-                minutes_reg <= minutes_next;
-                hours_reg <= hours_next;
-                noon_reg <= noon_next;
-                count <= '0';
-                blink <= '0';
+        if btnu = '1' then
+            if state = 1 then
+                minutes_reg <= minutes_reg + 1;
+            elsif state = 2 then
+                hours_reg <= hours_reg + 1;
+            elsif state = 3 then
+                noon_reg <= not noon_reg;
             end if;
         else
-            blink <= not blink;
-        end if;
-    end process;
-
-    -- btnu state machine
-    process (clk)
-    begin
-        if rising_edge(clk) then
-            if btnu = '1' then
-                case state is
-                    when 1 =>  -- set minutes
-                        if minutes_reg < 59 then
-                            minutes_next <= STD_LOGIC_VECTOR(UNSIGNED(minutes_reg) + 1);
-                        else
-                            minutes_next <= "000000";
-                        end if;
-                    when 2 =>  -- set hours
-                        if hours_reg < 11 then
-                            hours_next <= STD_LOGIC_VECTOR(UNSIGNED(hours_reg) + 1);
-                        else
-                            hours_next <= "0000";
-                        end if;
-                    when 3 =>  -- set AM/PM
-                        noon_next <= not noon_reg;
-                    when others =>
-                        null;
-                end case;
+            if state = 0 then
+                if count = '1' then
+                    seconds_reg <= seconds_next;
+                    minutes_reg <= minutes_next;
+                    hours_reg <= hours_next;
+                    noon_reg <= noon_next;
+                    count <= '0';
+                    blink <= '0';
+                end if;
+            else
+                blink <= not blink;
             end if;
         end if;
     end process;
@@ -161,11 +145,13 @@ begin
     hour_tens <= "00" & hours_reg(1) & "0" when hours_reg(3) = '1' else "0000";
     hour_units <= "000" & hours_reg(0) when hours_reg(3 downto 1) = "101" else hours_reg;
 
+    noon_tens <= "1010" when noon_reg = '0' else "1011";
+
     -- output
     process (state, blink, count)
     begin
         if state = 0 then
-            number(31 downto 28) <= "1010" when noon_reg = '0' else "1011";
+            number(31 downto 28) <= noon_tens;
             number(27 downto 24) <= "1111";
             number(23 downto 20) <= hour_tens;
             number(19 downto 16) <= hour_units;
@@ -176,7 +162,7 @@ begin
         else
             case state is
                 when 1 =>
-                    number(31 downto 28) <= "1010" when noon_reg = '0' else "1011";
+                    number(31 downto 28) <= noon_tens;
                     number(27 downto 24) <= "1111";
                     number(23 downto 20) <= hour_tens;
                     number(19 downto 16) <= hour_units;
@@ -190,7 +176,7 @@ begin
                     number(7 downto 4) <= sec_tens;
                     number(3 downto 0) <= sec_units;
                 when 2 =>
-                    number(31 downto 28) <= "1010" when noon_reg = '0' else "1011";
+                    number(31 downto 28) <= noon_tens;
                     if blink = '0' then
                         number(23 downto 20) <= hour_tens;
                         number(19 downto 16) <= hour_units;
@@ -205,7 +191,7 @@ begin
                     number(3 downto 0) <= sec_units;
                 when 3 =>
                     if blink = '0' then
-                        number(31 downto 28) <= "1010" when noon_reg = '0' else "1011";
+                        number(31 downto 28) <= noon_tens;
                         number(27 downto 24) <= "1111";
                     else
                         number(27 downto 24) <= "1110";

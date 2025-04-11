@@ -50,7 +50,7 @@ architecture Behavioral of topmodule is
             clk : in std_logic;
             btnc : in std_logic;
             btnu : in std_logic;
-            number : out std_logic_vector (31 downto 0);
+            number : out std_logic_vector (31 downto 0)
         );
     end component timer;
 
@@ -63,14 +63,14 @@ architecture Behavioral of topmodule is
     end component ButtonDebounce;
 
     signal number : std_logic_vector (31 downto 0);
-    signal btnc : std_logic;
-    signal btnu : std_logic;
+    signal btnc_db : std_logic;
+    signal btnu_db : std_logic;
 
 begin
 
-    btnc_instance : ButtonDebounce port map ( clk => CLK, btn_in => BTNC, btn_out => btnc );
-    btnu_instance : ButtonDebounce port map ( clk => CLK, btn_in => BTNU, btn_out => btnu );
-    timer_instance : timer port map ( clk => CLK, btnc => btnc, btnu => btnu, number => number );
+    btnc_instance : ButtonDebounce port map ( clk => CLK, btn_in => BTNC, btn_out => btnc_db );
+    btnu_instance : ButtonDebounce port map ( clk => CLK, btn_in => BTNU, btn_out => btnu_db );
+    timer_instance : timer port map ( clk => CLK, btnc => btnc_db, btnu => btnu_db, number => number );
     segment_display_instance : segment_display port map ( clk => CLK, number => number, SEG => SEG, AN => AN );
 
 end Behavioral;
