@@ -18,6 +18,6 @@ We use VHDL to program FPGA. Here is the homework of this course.
 - sequence signal generator
 - sequence signal detector
 
-## lab5 Seven Segment Display
+### lab5 Seven Segment Display
 - 7-segment display clock
 - fibonacci sequence computer
