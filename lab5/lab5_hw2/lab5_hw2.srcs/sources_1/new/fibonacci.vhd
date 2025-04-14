@@ -23,38 +23,60 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity fibonacci is
+entity fibonacci_fsm is
     Port (
+        clk : in  STD_LOGIC;
+        rst : in  STD_LOGIC;
+        start : in  STD_LOGIC;
         n : in  STD_LOGIC_VECTOR (5 downto 0);
-        fib_n : out STD_LOGIC_VECTOR (63 downto 0)
+        fib_n : out STD_LOGIC_VECTOR (63 downto 0);
+        done : out STD_LOGIC
     );
-end fibonacci;
+end fibonacci_fsm;
 
-architecture Behavioral of fibonacci is
-    signal a : unsigned(63 downto 0) := x"0000000000000000"; -- fib(n-2)
-    signal b : unsigned(63 downto 0) := x"0000000000000001"; -- fib(n-1)
-    signal temp : unsigned(63 downto 0);
-    signal n_int : integer range 0 to 63;
+architecture Behavioral of fibonacci_fsm is
+    type state_type is (IDLE, CALC, OK);
+    signal state : state_type := IDLE;
+    signal a : unsigned(63 downto 0) := (others => '0'); -- fib(n-2)
+    signal b : unsigned(63 downto 0) := (others => '0'); -- fib(n-1)
+    signal temp : unsigned(63 downto 0); -- Temporary result of the adder
+    signal counter : integer := 0;
 begin
-    process(n)
+    -- Adder
+    temp <= a + b;
+
+    process(clk, rst)
     begin
-        n_int := to_integer(unsigned(n));
-        
-        if n_int = 0 then
-            fib_n <= std_logic_vector(a);
-        elsif n_int = 1 then
-            fib_n <= std_logic_vector(b);
-        else
-            a <= x"0000000000000000"; -- fib(0)
-            b <= x"0000000000000001"; -- fib(1)
-            
-            for i in 2 to n_int loop
-                temp <= a + b;
-                a <= b;
-                b <= temp;
-            end loop;
-            
-            fib_n <= std_logic_vector(b);
+        if rst = '1' then
+            state <= IDLE;
+            a <= (others => '0');
+            b <= (others => '0');
+            counter <= 0;
+            fib_n <= (others => '0');
+            done <= '0';
+        elsif rising_edge(clk) then
+            case state is
+                when IDLE =>
+                    if start = '1' then
+                        a <= (others => '0'); -- fib(0)
+                        b <= (others => '0');
+                        b(0) <= '1'; -- fib(1)
+                        counter <= 2;
+                        state <= CALC;
+                    end if;
+                when CALC =>
+                    if counter <= to_integer(unsigned(n)) then
+                        a <= b;
+                        b <= temp;
+                        counter <= counter + 1;
+                    else
+                        state <= OK;
+                    end if;
+                when OK =>
+                    fib_n <= std_logic_vector(b);
+                    done <= '1';
+                    state <= IDLE;
+            end case;
         end if;
     end process;
 end Behavioral;
