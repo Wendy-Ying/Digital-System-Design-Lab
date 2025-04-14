@@ -28,8 +28,7 @@ entity timer is
         clk : in std_logic;
         btnc : in std_logic;
         btnu : in std_logic;
-        number : out std_logic_vector (31 downto 0);
-        led : out std_logic_vector (3 downto 0)
+        number : out std_logic_vector (31 downto 0)
     );
 end timer;
 
@@ -48,6 +47,11 @@ architecture Behavioral of timer is
     signal hours_next : integer range 0 to 11 := 0;
     signal noon_next : std_logic := '0';
 
+    signal seconds_add : integer range 0 to 59 := 0;
+    signal minutes_add : integer range 0 to 59 := 0;
+    signal hours_add : integer range 0 to 11 := 0;
+    signal noon_add : std_logic := '0';
+
     signal sec_tens : integer range 0 to 5 := 0;  -- s (0-5)
     signal sec_units : integer range 0 to 9 := 0; -- s (0-9)
     signal min_tens : integer range 0 to 5 := 0;  -- m (0-5)
@@ -57,7 +61,9 @@ architecture Behavioral of timer is
     signal noon_tens : std_logic_vector (3 downto 0); -- A/P
 
     signal state : integer range 0 to 3 := 0;
-    signal blink : std_logic := '0';
+    signal blink_m : std_logic := '0';
+    signal blink_h : std_logic := '0';
+    signal blink_a : std_logic := '0';
 
 begin
 
@@ -67,13 +73,39 @@ begin
         if rising_edge(clk) then
             if clock_divider = 99999999 then
                 clock_divider <= 0;
-                seconds_reg <= seconds_next;
-                minutes_reg <= minutes_next;
-                hours_reg <= hours_next;
-                noon_reg <= noon_next;
-                blink <= not blink;
+                if state = 0 then
+                    seconds_reg <= seconds_next;
+                    minutes_reg <= minutes_next;
+                    hours_reg <= hours_next;
+                    noon_reg <= noon_next;
+                    blink_m <= '0';
+                    blink_h <= '0';
+                    blink_a <= '0';
+                elsif state = 1 then
+                    minutes_reg <= minutes_add;
+                    blink_m <= not blink_m;
+                    blink_h <= '0';
+                    blink_a <= '0';
+                elsif state = 2 then
+                    hours_reg <= hours_add;
+                    blink_h <= not blink_h;
+                    blink_m <= '0';
+                    blink_a <= '0';
+                elsif state = 3 then
+                    noon_reg <= noon_add;
+                    blink_a <= not blink_a;
+                    blink_m <= '0';
+                    blink_h <= '0';
+                end if;
             else
                 clock_divider <= clock_divider + 1;
+                if state = 1 then
+                    minutes_reg <= minutes_add;
+                elsif state = 2 then
+                    hours_reg <= hours_add;
+                elsif state = 3 then
+                    noon_reg <= noon_add;
+                end if;
             end if;
         end if;
     end process;
@@ -81,8 +113,34 @@ begin
     -- state detection
     process (btnc)
     begin
-        if btnc = '1' then
-            state <= state + 1;
+        if rising_edge(btnc) then
+            if state < 3 then
+                state <= state + 1;
+            else
+                state <= 0;
+            end if;
+        end if;
+    end process;
+
+    -- button detection
+    process (btnu)
+    begin
+        if rising_edge(btnu) then
+            if state = 1 then
+                if minutes_reg = 59 then
+                    minutes_add <= 0;
+                else
+                    minutes_add <= minutes_reg + 1;
+                end if;
+            elsif state = 2 then
+                if hours_reg = 11 then
+                    hours_add <= 0;
+                else
+                    hours_add <= hours_reg + 1;
+                end if;
+            elsif state = 3 then
+                noon_add <= not noon_reg;
+            end if;
         end if;
     end process;
 
@@ -109,17 +167,16 @@ begin
     hour_tens <= hours_reg / 10;
     hour_units <= hours_reg mod 10;
 
-    noon_tens <= "1010" when noon_reg = '0' else "1111";
+    noon_tens <= "1010" when noon_reg = '0' else "1100";
 
     -- output
-    number(31 downto 28) <= noon_tens;
-    number(27 downto 24) <= "1011";
-    number(23 downto 20) <= std_logic_vector(to_unsigned(hour_tens, 4));
-    number(19 downto 16) <= std_logic_vector(to_unsigned(hour_units, 4));
-    number(15 downto 12) <= std_logic_vector(to_unsigned(min_tens, 4));
-    number(11 downto 8) <= std_logic_vector(to_unsigned(min_units, 4));
+    number(31 downto 28) <= noon_tens when blink_a = '0' else "1111";
+    number(27 downto 24) <= "1011" when blink_a = '0' else "1111";
+    number(23 downto 20) <= std_logic_vector(to_unsigned(hour_tens, 4)) when blink_h = '0' else "1111";
+    number(19 downto 16) <= std_logic_vector(to_unsigned(hour_units, 4)) when blink_h = '0' else "1111";
+    number(15 downto 12) <= std_logic_vector(to_unsigned(min_tens, 4)) when blink_m = '0' else "1111";
+    number(11 downto 8) <= std_logic_vector(to_unsigned(min_units, 4)) when blink_m = '0' else "1111";
     number(7 downto 4) <= std_logic_vector(to_unsigned(sec_tens, 4));
     number(3 downto 0) <= std_logic_vector(to_unsigned(sec_units, 4));
     
-    led <= std_logic_vector(to_unsigned(seconds_reg, 4));
 end Behavioral;
