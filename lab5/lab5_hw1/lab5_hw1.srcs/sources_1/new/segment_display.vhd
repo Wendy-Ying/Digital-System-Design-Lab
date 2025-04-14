@@ -91,12 +91,12 @@ begin
             "0000000" when "1000", -- 8
             "0010000" when "1001", -- 9
             "0001000" when "1010", -- A
-            "0111010" when "1011", -- M
+            "1101010" when "1011", -- M
             "0001100" when "1111", -- P
             "1111111" when others;
 
     -- output
-    SEG <= "0" & segment_data;
+    SEG <= '1' & segment_data;
     AN <= an_tmp;
 
 end Behavioral;
