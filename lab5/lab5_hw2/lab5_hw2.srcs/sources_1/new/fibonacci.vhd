@@ -27,54 +27,57 @@ entity fibonacci_fsm is
     Port (
         clk : in  STD_LOGIC;
         rst : in  STD_LOGIC;
-        start : in  STD_LOGIC;
+        start : in STD_LOGIC;
         n : in  STD_LOGIC_VECTOR (5 downto 0);
         fib_n : out STD_LOGIC_VECTOR (63 downto 0);
-        done : out STD_LOGIC
+        finish : out STD_LOGIC
     );
 end fibonacci_fsm;
 
 architecture Behavioral of fibonacci_fsm is
-    type state_type is (IDLE, CALC, OK);
+    type state_type is (IDLE, CALC, DONE);
     signal state : state_type := IDLE;
-    signal a : unsigned(63 downto 0) := (others => '0'); -- fib(n-2)
-    signal b : unsigned(63 downto 0) := (others => '0'); -- fib(n-1)
-    signal temp : unsigned(63 downto 0); -- Temporary result of the adder
+    signal prev : unsigned(63 downto 0) := (others => '0'); -- fib(n-2)
+    signal current : unsigned(63 downto 0) := (others => '0'); -- fib(n-1)
     signal counter : integer := 0;
+    signal n_int : integer := 0;
 begin
-    -- Adder
-    temp <= a + b;
-
+    n_int <= to_integer(unsigned(n));
     process(clk, rst)
     begin
         if rst = '1' then
             state <= IDLE;
-            a <= (others => '0');
-            b <= (others => '0');
+            prev <= (others => '0');
+            current <= (others => '0');
             counter <= 0;
             fib_n <= (others => '0');
-            done <= '0';
+            finish <= '0';
         elsif rising_edge(clk) then
             case state is
                 when IDLE =>
                     if start = '1' then
-                        a <= (others => '0'); -- fib(0)
-                        b <= (others => '0');
-                        b(0) <= '1'; -- fib(1)
-                        counter <= 2;
+                        finish <= '0';
+                        prev <= (others => '0');
+                        if n_int = 0 then
+                            current <= (others => '0');
+                            counter <= 0;
+                        else
+                            current <= (0 => '1', others => '0');
+                            counter <= 1;
+                        end if;
                         state <= CALC;
                     end if;
                 when CALC =>
-                    if counter <= to_integer(unsigned(n)) then
-                        a <= b;
-                        b <= temp;
+                    if counter < n_int then
+                        prev <= current;
+                        current <= current + prev;
                         counter <= counter + 1;
                     else
-                        state <= OK;
+                        state <= DONE;
                     end if;
-                when OK =>
-                    fib_n <= std_logic_vector(b);
-                    done <= '1';
+                when DONE =>
+                    fib_n <= std_logic_vector(current);
+                    finish <= '1';
                     state <= IDLE;
             end case;
         end if;
