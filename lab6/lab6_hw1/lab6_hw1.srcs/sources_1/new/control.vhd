@@ -21,15 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+use IEEE.NUMERIC_STD.ALL;
 
 entity control is
     Port (
@@ -42,7 +34,33 @@ end control;
 
 architecture Behavioral of control is
 
+    signal clock_divider : integer range 0 to 99999999 := 0;
+    signal num : integer range 0 to 9 := 0;
+    signal num_new : integer range 0 to 9;
+
 begin
 
+    process(btnu)
+    begin
+        if rising_edge(btnu) then
+            if num < 9 then
+                num_new <= num + 1;
+            end if;
+        end if;
+    end process;
+
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if clock_divider = 99999999 then
+                num <= num_new;
+                clock_divider <= 0;
+            else
+                clock_divider <= clock_divider + 1;
+            end if;
+        end if;
+    end process;
+
+    number <= std_logic_vector(to_unsigned(num, 4));
 
 end Behavioral;

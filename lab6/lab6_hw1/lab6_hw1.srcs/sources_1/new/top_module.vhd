@@ -22,15 +22,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
 entity top_module is
     Port (
         CLK : in  std_logic;
@@ -89,7 +80,7 @@ architecture Behavioral of top_module is
 
 begin
 
-    full_number <= "0000000000000000000000000000" & number;
+    full_number <= "1111111111111111111111111111" & number;
     
     btnu_debounce : button_debounce
         port map (
