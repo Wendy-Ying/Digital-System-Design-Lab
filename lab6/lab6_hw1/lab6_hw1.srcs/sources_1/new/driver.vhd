@@ -32,7 +32,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity driver is
---  Port ( );
+    Port (
+        clk : in std_logic;
+        en : in std_logic;
+        dir : in std_logic;
+        vel : in std_logic_vector (3 downto 0);
+        PMOD : out std_logic_vector (3 downto 0)
+    );
 end driver;
 
 architecture Behavioral of driver is

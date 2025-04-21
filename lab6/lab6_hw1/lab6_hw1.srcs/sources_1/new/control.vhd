@@ -32,7 +32,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity control is
---  Port ( );
+    Port (
+        clk : in std_logic;
+        btnu : in std_logic;
+        btnd : in std_logic;
+        number : out std_logic_vector (3 downto 0)
+    );
 end control;
 
 architecture Behavioral of control is
