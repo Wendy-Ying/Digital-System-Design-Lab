@@ -40,18 +40,15 @@ architecture Behavioral of control is
 
 begin
 
-    process(btnu)
-    begin
-        if rising_edge(btnu) then
-            if num < 9 then
-                num_new <= num + 1;
-            end if;
-        end if;
-    end process;
-
     process(clk)
     begin
         if rising_edge(clk) then
+            if btnu = '1' and num < 9 then
+                num_new <= num + 1;
+            elsif btnd = '1' and num > 0 then
+                num_new <= num - 1;
+            end if;
+
             if clock_divider = 99999999 then
                 num <= num_new;
                 clock_divider <= 0;

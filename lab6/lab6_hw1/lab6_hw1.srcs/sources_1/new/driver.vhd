@@ -35,54 +35,50 @@ end driver;
 
 architecture Behavioral of driver is
     
-    signal clock_divider : integer range 0 to 99999999 := 0;
     signal state : integer range 0 to 7 := 0;
-    signal counter : integer range 0 to 60 := 0;
-    signal counter_max : integer range 0 to 60 := 0;
+    signal counter : integer range -1 to 60 := 0;
+    signal counter_max : integer range -1 to 60 := 0;
 
 begin
 
-    counter_max <= 60/to_integer(unsigned(vel)) when vel /= "0000" else 0;
+    counter_max <= 146401
+    843/to_integer(unsigned(vel)) when vel /= "0000" else 0;
 
     process(clk)
     begin
         if rising_edge(clk) then
-            if clock_divider = 99999999 then
-                clock_divider <= 0;
-                if (counter = counter_max - 1) and counter_max /= 0 then
-                    counter <= 0;
-                    if en = '1' then
-                        if dir = '1' then
-                            case state is
-                                when 0 => PMOD <= "1000"; state <= 1;
-                                when 1 => PMOD <= "1100"; state <= 2;
-                                when 2 => PMOD <= "0100"; state <= 3;
-                                when 3 => PMOD <= "0110"; state <= 4;
-                                when 4 => PMOD <= "0010"; state <= 5;
-                                when 5 => PMOD <= "0011"; state <= 6;
-                                when 6 => PMOD <= "0001"; state <= 7;
-                                when 7 => PMOD <= "1001"; state <= 0;
-                                when others => PMOD <= "0000"; state <= 0;
-                            end case;
-                        else
-                            case state is
-                                when 0 => PMOD <= "1000"; state <= 7;
-                                when 1 => PMOD <= "1100"; state <= 0;
-                                when 2 => PMOD <= "0100"; state <= 1;
-                                when 3 => PMOD <= "0110"; state <= 2;
-                                when 4 => PMOD <= "0010"; state <= 3;
-                                when 5 => PMOD <= "0011"; state <= 4;
-                                when 6 => PMOD <= "0001"; state <= 5;
-                                when 7 => PMOD <= "1001"; state <= 6;
-                                when others => PMOD <= "0000"; state <= 0;
-                            end case;
-                        end if;
+            if (counter = counter_max - 1) then
+                counter <= 0;
+                if en = '1' then
+                    if dir = '1' then
+                        case state is
+                            when 0 => PMOD <= "1000"; state <= 1;
+                            when 1 => PMOD <= "1100"; state <= 2;
+                            when 2 => PMOD <= "0100"; state <= 3;
+                            when 3 => PMOD <= "0110"; state <= 4;
+                            when 4 => PMOD <= "0010"; state <= 5;
+                            when 5 => PMOD <= "0011"; state <= 6;
+                            when 6 => PMOD <= "0001"; state <= 7;
+                            when 7 => PMOD <= "1001"; state <= 0;
+                            when others => PMOD <= "0000"; state <= 0;
+                        end case;
+                    else
+                        case state is
+                            when 0 => PMOD <= "1000"; state <= 7;
+                            when 1 => PMOD <= "1100"; state <= 0;
+                            when 2 => PMOD <= "0100"; state <= 1;
+                            when 3 => PMOD <= "0110"; state <= 2;
+                            when 4 => PMOD <= "0010"; state <= 3;
+                            when 5 => PMOD <= "0011"; state <= 4;
+                            when 6 => PMOD <= "0001"; state <= 5;
+                            when 7 => PMOD <= "1001"; state <= 6;
+                            when others => PMOD <= "0000"; state <= 0;
+                        end case;
                     end if;
-                else
-                    counter <= counter + 1;
                 end if;
+            else
+                counter <= counter + 1;
             end if;
-            clock_divider <= clock_divider + 1;
         end if;
     end process;
 
