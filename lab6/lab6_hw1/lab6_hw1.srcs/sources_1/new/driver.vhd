@@ -36,13 +36,12 @@ end driver;
 architecture Behavioral of driver is
     
     signal state : integer range 0 to 7 := 0;
-    signal counter : integer range -1 to 60 := 0;
-    signal counter_max : integer range -1 to 60 := 0;
+    signal counter : integer range -1 to 1464843 := 0;
+    signal counter_max : integer range -1 to 1464843 := 0;
 
 begin
 
-    counter_max <= 146401
-    843/to_integer(unsigned(vel)) when vel /= "0000" else 0;
+    counter_max <= 1464843/to_integer(unsigned(vel)) when vel /= "0000" else 0;
 
     process(clk)
     begin
