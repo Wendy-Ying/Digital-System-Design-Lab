@@ -4,10 +4,10 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.STD_LOGIC_TEXTIO.ALL;
 use STD.TEXTIO.ALL;
 
-entity tb_combinational_design is
-end tb_combinational_design;
+entity combinational_testbench is
+end combinational_testbench;
 
-architecture Behavioral of tb_combinational_design is
+architecture Behavioral of combinational_testbench is
     component combinational_design is
         port (
             a, b : in std_logic_vector(4 downto 0);
