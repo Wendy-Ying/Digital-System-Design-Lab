@@ -65,9 +65,9 @@ begin
     bv3 <= (others => b3_reg(3));
     bp3 <= "0" & (bv3 and a3_reg);
     pp3_next(8 downto 3) <= ("0" & pp2_reg(7 downto 3)) + bp3;
-    pp3_next(4 downto 0) <= pp2_reg(2 downto 0);
+    pp3_next(2 downto 0) <= pp2_reg(2 downto 0);
     a4_next              <= a3_reg;
-    b4_next              <= b3_reg(4);
+    b4_next              <= b3_reg(4 downto 4);
 
     -- Stage 4: Final pipeline stage
     bv4 <= (others => b4_reg(4));

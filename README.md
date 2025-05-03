@@ -21,3 +21,9 @@ We use VHDL to program FPGA. Here is the homework of this course.
 ### lab5 Seven Segment Display
 - 7-segment display clock
 - fibonacci sequence computer
+
+### lab6 step motor and multiplier
+- step motor
+- combination-addition multiplier
+- repetitive-addition multiplier
+- pipeline-addition multiplier

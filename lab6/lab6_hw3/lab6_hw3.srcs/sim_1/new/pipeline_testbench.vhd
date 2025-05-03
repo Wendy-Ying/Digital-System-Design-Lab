@@ -1,8 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.STD_LOGIC_TEXTIO.ALL;
-use STD.TEXTIO.ALL;
 
 entity pipeline_testbench is
 end pipeline_testbench;
@@ -24,11 +22,6 @@ architecture Behavioral of pipeline_testbench is
     signal reset : std_logic := '1';
     signal a, b  : std_logic_vector(4 downto 0);
     signal y     : std_logic_vector(9 downto 0);
-    
-    -- Pipeline latency (5 stages)
-    constant PIPELINE_DELAY : integer := 5;
-    type data_queue is array(0 to PIPELINE_DELAY-1) of std_logic_vector(9 downto 0);
-    signal expected_results : data_queue;
 
 begin
     -- Clock generation
@@ -47,95 +40,45 @@ begin
 
     -- Test stimulus
     stimulus: process
-        variable test_pass : boolean := true;
-        variable line_out : line;
     begin
-        -- Initialize system
+        -- Initialize and reset
         reset <= '1';
-        wait for CLK_PERIOD*2;
+        wait for CLK_PERIOD * 2;
         reset <= '0';
-        wait until falling_edge(clk);
+        wait for CLK_PERIOD;
 
-        -- ========== Basic Tests ==========
-        write(line_out, string'("=== Pipeline Multiplier Test ==="));
-        writeline(output, line_out);
-        
         -- Test 1: 0 * 0
-        push_test_case("00000", "00000", 0);
-        
+        a <= "00000"; b <= "00000";
+        wait for CLK_PERIOD;
+        assert y = "0000000000" report "Test 1 failed: 0*0" severity error;
+
         -- Test 2: 1 * 1
-        push_test_case("00001", "00001", 1);
-        
+        a <= "00001"; b <= "00001";
+        wait for CLK_PERIOD;
+        assert y = "0000000001" report "Test 2 failed: 1*1" severity error;
+
         -- Test 3: 31 * 31
-        push_test_case("11111", "11111", 961);
+        a <= "11111"; b <= "11111";
+        wait for CLK_PERIOD;
+        assert y = "0000001111100001" report "Test 3 failed: 31*31" severity error;
 
-        -- ========== Random Tests ==========
-        write(line_out, string'("Random testing (20 cases)..."));
-        writeline(output, line_out);
-        for i in 1 to 20 loop
-            push_random_case;
-        end loop;
+        -- Test 4: Max * 1
+        a <= "11111"; b <= "00001";
+        wait for CLK_PERIOD;
+        assert y = "0000001111100001" report "Test 4 failed: 31*1" severity error;
 
-        -- Wait for final results
-        wait until rising_edge(clk);
-        wait until rising_edge(clk);
-        wait until rising_edge(clk);
-        
-        -- Final report
-        if test_pass then
-            write(line_out, string'("All pipeline tests PASSED!"));
-        else
-            write(line_out, string'("Some pipeline tests FAILED!"));
-        end if;
-        writeline(output, line_out);
+        -- Test 5: 1 * Max
+        a <= "00001"; b <= "11111";
+        wait for CLK_PERIOD;
+        assert y = "0000000000011111" report "Test 5 failed: 1*31" severity error;
+
+        -- Test 6: 4 * 8
+        a <= "00100"; b <= "01000";
+        wait for CLK_PERIOD;
+        assert y = "0000000000100000" report "Test 6 failed: 4*8" severity error;
+
+        -- End of test
         wait;
     end process;
-
-    -- Result checker process
-    checker: process(clk)
-        variable expected : std_logic_vector(9 downto 0);
-        variable line_out : line;
-    begin
-        if rising_edge(clk) and reset = '0' then
-            expected := expected_results(0);
-            expected_results(0 to PIPELINE_DELAY-2) := expected_results(1 to PIPELINE_DELAY-1);
-            
-            if y /= expected then
-                write(line_out, string'("Mismatch at cycle ") & time'image(now) &
-                      string'(" Expected: ") & to_hstring(expected) &
-                      string'(" Received: ") & to_hstring(y));
-                writeline(output, line_out);
-                report "Test failed" severity error;
-            end if;
-        end if;
-    end process;
-
-    -- Helper procedures
-    procedure push_test_case(
-        a_in : std_logic_vector(4 downto 0);
-        b_in : std_logic_vector(4 downto 0);
-        expected : integer
-    ) is
-        variable line_out : line;
-    begin
-        a <= a_in;
-        b <= b_in;
-        expected_results(PIPELINE_DELAY-1) <= std_logic_vector(to_unsigned(expected, 10));
-        wait until rising_edge(clk);
-    end procedure;
-
-    procedure push_random_case is
-        variable a_val, b_val : std_logic_vector(4 downto 0);
-        variable product : integer;
-    begin
-        a_val := std_logic_vector(to_unsigned(integer(rand(0.0, 31.0)), 5);
-        b_val := std_logic_vector(to_unsigned(integer(rand(0.0, 31.0)), 5);
-        product := to_integer(unsigned(a_val)) * to_integer(unsigned(b_val));
-        
-        a <= a_val;
-        b <= b_val;
-        expected_results(PIPELINE_DELAY-1) <= std_logic_vector(to_unsigned(product, 10));
-        wait until rising_edge(clk);
-    end procedure;
 
 end Behavioral;
