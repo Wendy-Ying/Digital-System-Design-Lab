@@ -7,7 +7,6 @@ end pipeline_testbench;
 
 architecture Behavioral of pipeline_testbench is
     component pipeline_multiplier is
-        generic(WIDTH : integer := 5);
         port(
             clk   : in  std_logic;
             reset : in  std_logic;
@@ -29,7 +28,6 @@ begin
 
     -- Instantiate DUT
     uut: pipeline_multiplier
-        generic map(WIDTH => 5)
         port map(
             clk   => clk,
             reset => reset,
@@ -49,33 +47,33 @@ begin
 
         -- Test 1: 0 * 0
         a <= "00000"; b <= "00000";
-        wait for CLK_PERIOD;
+        wait for CLK_PERIOD * 5;
         assert y = "0000000000" report "Test 1 failed: 0*0" severity error;
 
         -- Test 2: 1 * 1
         a <= "00001"; b <= "00001";
-        wait for CLK_PERIOD;
+        wait for CLK_PERIOD * 5;
         assert y = "0000000001" report "Test 2 failed: 1*1" severity error;
 
         -- Test 3: 31 * 31
         a <= "11111"; b <= "11111";
-        wait for CLK_PERIOD;
-        assert y = "0000001111100001" report "Test 3 failed: 31*31" severity error;
+        wait for CLK_PERIOD * 5;
+        assert y = "1111100001" report "Test 3 failed: 31*31" severity error;
 
         -- Test 4: Max * 1
         a <= "11111"; b <= "00001";
-        wait for CLK_PERIOD;
-        assert y = "0000001111100001" report "Test 4 failed: 31*1" severity error;
+        wait for CLK_PERIOD * 5;
+        assert y = "1111100001" report "Test 4 failed: 31*1" severity error;
 
         -- Test 5: 1 * Max
         a <= "00001"; b <= "11111";
-        wait for CLK_PERIOD;
-        assert y = "0000000000011111" report "Test 5 failed: 1*31" severity error;
+        wait for CLK_PERIOD * 5;
+        assert y = "0000011111" report "Test 5 failed: 1*31" severity error;
 
         -- Test 6: 4 * 8
         a <= "00100"; b <= "01000";
-        wait for CLK_PERIOD;
-        assert y = "0000000000100000" report "Test 6 failed: 4*8" severity error;
+        wait for CLK_PERIOD * 5;
+        assert y = "0000100000" report "Test 6 failed: 4*8" severity error;
 
         -- End of test
         wait;
